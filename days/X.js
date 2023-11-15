@@ -1,4 +1,11 @@
 // Made by Firstname Lastname (keep this line and replace with your name)
+
+
+//Layers
+layerMainGraphics = null
+layerSnowGlobe = null
+pg = null
+
 //Terrain Variables
 
 let terrainHeight = 0
@@ -46,10 +53,24 @@ darkerTerrain=null
 darkestTerrain=null
 buildingAnchorCol = []
 
+//Amount of space either side occupied by snow globe
+globeEdgeTrim=130
+
 //Sun Logic
 sunColor = []
-sunSize = 0
-sunLocation = []
+sunSize = 0 
+sunLocation = [] 
+
+sunRayLoopTime = 100
+sunLoopTimer = 0
+
+sunRayWidth = 5
+sunRayLength = 0
+sunRayMinLength = 0
+sunRayMaxLength = 0
+sunSpinRate = 0.3
+
+sunRayAngles = [0,45,90,135,180,225,270,315,360]
 
 
 //Snow Logic
@@ -132,10 +153,14 @@ class DayX extends Day {
         button.size(80,30)
         button.mousePressed(initialise);
         */
+        layerMainGraphics = createGraphics(700, 700)
+        layerSnowGlobe = createGraphics(700, 700) 
+        pg =createGraphics(200, 200);
     }
 
     prerun() {
- 
+        //layerMainGraphics = createGraphics(width, height)
+        //layerSnowGlobe = createGraphics(width, height) 
         initialise()
         
     }
@@ -161,8 +186,9 @@ class DayX extends Day {
       //Snow drawing
       else{
       
-        background(bgCol);
+        layerMainGraphics.background(bgCol);
         drawSun(sunColor,sunSize,sunLocation)
+        drawSunRays()
         drawHill(h1Height, color(hill1Col), h1Seed)
         drawHill(h2Height, color(hill2Col), h2Seed)
         drawHill(h3Height, color(hill3Col), h3Seed)
@@ -174,7 +200,7 @@ class DayX extends Day {
         //console.log(treeData.length)
         
         treeData.forEach(drawTree)
-        strokeWeight(1)
+        layerMainGraphics.strokeWeight(1)
     
         //Generating new snow
         initialiseSnowLocations()
@@ -204,10 +230,10 @@ class DayX extends Day {
   
           //swirl+=random(-swirlChaosMod,swirlChaosMod)
           snowLocations[i][0]+=(swirl+(currWind*windMod))
-          fill(255,255,255)
-          noStroke()
+          layerMainGraphics.fill(255,255,255)
+          layerMainGraphics.noStroke()
           //stroke(255)
-          circle(snowLocations[i][0], snowLocations[i][1], random(1,5));
+          layerMainGraphics.circle(snowLocations[i][0], snowLocations[i][1], random(1,5));
           //point(snowLocations[i][0], snowLocations[i][1])
           if(snowLocations[i][1]>(height-terrainHeight-3)){
             //snowLocations.shift()
@@ -218,6 +244,7 @@ class DayX extends Day {
             }
           }
         }
+
       }
         
       if(accumulatingSnow){
@@ -251,13 +278,59 @@ class DayX extends Day {
           }
           
           //Draw snow
-          stroke([255,255,255])
-          line(snowPilePositions[b][0],height-snowPilePositions[b][1],snowPilePositions[b][0],height-snowPilePositions[b][1]-snowPilePositions[b][2])
+          layerMainGraphics.stroke([255,255,255])
+          layerMainGraphics.line(snowPilePositions[b][0],height-snowPilePositions[b][1],snowPilePositions[b][0],height-snowPilePositions[b][1]-snowPilePositions[b][2])
         }  
       }
       //Draw trees last so they are in front of snowy windows
       treeData.forEach(drawTree)
-      strokeWeight(1) 
+      layerMainGraphics.strokeWeight(1)  
+      
+      layerSnowGlobe.background(30)
+      layerSnowGlobe.stroke([217,242,255])
+      layerSnowGlobe.strokeWeight(10)
+      //layerSnowGlobe.noFill()
+      layerSnowGlobe.circle(width/2,height/2,656)
+      layerSnowGlobe.strokeWeight(1)
+         
+      layerSnowGlobe.erase()
+      layerSnowGlobe.circle(width/2,height/2,650)
+      layerSnowGlobe.noErase()
+      
+      //Draw wood base
+      layerSnowGlobe.fill([156,96,44])
+      layerSnowGlobe.stroke([122,77,37])
+      layerSnowGlobe.rect(160,630,380,70)
+
+      layerSnowGlobe.fill([76,47,18])
+      layerSnowGlobe.stroke([54,32,12])
+      layerSnowGlobe.rect(120,650,460,50)
+
+      //Draw Gold Plaque
+      
+      layerSnowGlobe.fill([227, 177, 50])
+      layerSnowGlobe.stroke([191, 151, 50])
+      layerSnowGlobe.strokeWeight(1)
+      layerSnowGlobe.rect(150,660,400,30)
+
+      //Draw Globe Text
+      layerSnowGlobe.fill([125, 100, 37])
+      layerSnowGlobe.noStroke()
+      layerSnowGlobe.textSize(24);
+      layerSnowGlobe.text('City #' + mainSeed, 300, 682);
+
+
+
+      //layerMainGraphics.background=([0,0,0])
+      //layerMainGraphics.erase()
+      //layerMainGraphics.circle(width/2,height/2,700)
+
+      //image(layerMainGraphics,700, 700)
+
+
+     
+      image(layerMainGraphics,0,0)
+      image(layerSnowGlobe,0,0)
     }
 
     // Below are optional functions for interactivity. They can be deleted from this file if you want
@@ -324,17 +397,17 @@ function initialise(){
         inp.value=''
     }
     else{
-        mainSeed = int(random(0,1000))
+        mainSeed = int(random(0,10000))
         console.log(mainSeed)
     }  
 
     //Generate Seed
     noiseSeed(mainSeed)
     randomSeed(mainSeed)
-
+  
     generateColors()            
 
-    background(bgCol);
+    layerMainGraphics.background(bgCol);
 
     generateSunCharacteristics(bgCol)
     drawSun(sunColor,sunSize,sunLocation)
@@ -346,7 +419,7 @@ function initialise(){
     generateAllHills()
 
     //Terrain Gen
-    terrainHeight = random((height*(1/20)), (height*(1/15)))
+    terrainHeight = random(130, 130)
     drawTerrainBase(terrainHeight, terrainCol, darkerTerrain, darkestTerrain)
 
     for(z=0;z<width;z++){
@@ -377,17 +450,17 @@ function inputSeed(){
     //Generate base building
     bOutlineCol = [bd[3][0]-10, bd[3][1]-10,bd[3][2]-10]
     
-    stroke(bOutlineCol)
-    fill(bd[3])
+    layerMainGraphics.stroke(bOutlineCol)
+    layerMainGraphics.fill(bd[3])
     
     buildYloc = height-terrainHeight-bd[2]-1
     
-    rect(bd[0], buildYloc, bd[1], bd[2])
+    layerMainGraphics.rect(bd[0], buildYloc, bd[1], bd[2])
     
     //Generating DoorWay
-    fill(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50))
+    layerMainGraphics.fill(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50))
          
-    rect(bd[0]+(bd[1]/2)-(doorWidth/2), height-terrainHeight-doorHeight-1, doorWidth, doorHeight)
+    layerMainGraphics.rect(bd[0]+(bd[1]/2)-(doorWidth/2), height-terrainHeight-doorHeight-1, doorWidth, doorHeight)
     
   
     wData = calcWindowData(bd[1],bd[2])
@@ -401,8 +474,8 @@ function inputSeed(){
         
         xloc = bd[0]+horiSideGap+(x*(bWindowWidth+bWindowGap))
         yloc = buildYloc+bWindowGap+(y*(bWindowWidth+bWindowGap))
-        fill(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50))
-        rect(xloc, yloc, bWindowWidth, bWindowWidth)
+        layerMainGraphics.fill(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50))
+        layerMainGraphics.rect(xloc, yloc, bWindowWidth, bWindowWidth)
         
         
       }
@@ -427,15 +500,15 @@ function inputSeed(){
   }
   
   function drawTerrainBase(h, c1,c2,c3){
-    noStroke()
-    fill(c1)
-    rect(0, height-h, width, h)
-    noStroke()
-    fill(c2)
-    rect(0, height-(h*.6), width, h)
-    noStroke()
-    fill(c3)
-    rect(0, height-(h*.3), width, h) 
+    layerMainGraphics.noStroke()
+    layerMainGraphics.fill(c1)
+    layerMainGraphics.rect(0, height-h, width, h)
+    layerMainGraphics.noStroke()
+    layerMainGraphics.fill(c2)
+    layerMainGraphics.rect(0, height-(h*.9), width, h)
+    layerMainGraphics.noStroke()
+    layerMainGraphics.fill(c3)
+    layerMainGraphics.rect(0, height-(h*.8), width, h) 
   }
   
   function generateColors(){  
@@ -443,18 +516,18 @@ function inputSeed(){
     bgCols = [random(200, 255),random(200, 255),random(200, 255)]
     bgCol = color(bgCols)
   
-    h1Height = random((height*(1/3)), (height))
+    h1Height = random((height*(2/3)), (height))
     
     //h1Height = random(700, 1000)
     h1Cols = generateProximalColor(bgCols,30, 50, true) 
     hill1Col = color(append(h1Cols,1000))
     
-    h2Height = random((h1Height-((height-h1Height)*(1/50)), (h1Height-((height-h1Height)*(1/30)))))
+    h2Height = random((h1Height-((height-h1Height)*(1/50)), (h1Height-((height-h1Height)*(1/40)))))
     //h2Height = random(h1Height-5, h1Height-10)  
     h2Cols = generateProximalColor(h1Cols,30, 50, true)
     hill2Col = color(append(h2Cols,1000))
     
-    h3Height = random((h2Height-((height-h2Height)*(1/50)), ((height-h2Height)-(height*(1/30)))))
+    h3Height = random((h2Height-((height-h2Height)*(1/50)), ((height-h2Height)-(height*(1/40)))))
     h3Cols = generateProximalColor(h2Cols,30, 50, true)
     hill3Col = color(append(h3Cols,1000))
      
@@ -466,7 +539,7 @@ function inputSeed(){
     
     
     treeLeafColor = generateProximalColor(buildingAnchorCol,80, 120)
-    treeBranchColor = generateProximalColor(treeLeafColor,30, 80,true)
+    treeBranchColor = generateProximalColor(treeLeafColor,120, 120)
     append(treeLeafColor,200)
   }
   
@@ -511,7 +584,7 @@ function inputSeed(){
   }
    
   function generateBuildingData(){
-    for (i=0; i<width; i++){
+    for (i=globeEdgeTrim; i<width-globeEdgeTrim; i++){
       val = noise(i)
       genBuilding = false
       if(val<widthPortionBuildings){
@@ -544,7 +617,7 @@ function inputSeed(){
   
   function generateTreeData(){
     
-    for (i=0; i<width; i++){
+    for (i=globeEdgeTrim; i<width-globeEdgeTrim; i++){
       //console.log("i:")
       //console.log(i)
       
@@ -636,15 +709,15 @@ function inputSeed(){
     
     //Draw branches
     for(i = 0; i<td[0].length;i++){
-      stroke(treeBranchColor)
-      strokeWeight(td[0][i][4])
-      line(td[0][i][0],td[0][i][1],td[0][i][2],td[0][i][3])
+      layerMainGraphics.stroke(treeBranchColor)
+      layerMainGraphics.strokeWeight(td[0][i][4])
+      layerMainGraphics.line(td[0][i][0],td[0][i][1],td[0][i][2],td[0][i][3])
     }
     //Draw Leaves
     for(j = 0; j<td[1].length;j++){
-      noStroke()
-      fill(treeLeafColor)
-      circle(td[1][j][0],td[1][j][1],td[1][j][2])
+      layerMainGraphics.noStroke()
+      layerMainGraphics.fill(treeLeafColor)
+      layerMainGraphics.circle(td[1][j][0],td[1][j][1],td[1][j][2])
     }  
   }
   
@@ -744,8 +817,8 @@ function inputSeed(){
       // Compute noise value.
       let y = h * noise(nx, nt);
       // Render.
-      stroke(col)
-      line(x, height, x, height-y);
+      layerMainGraphics.stroke(col)
+      layerMainGraphics.line(x, height, x, height-y);
     }
   }
   
@@ -782,20 +855,70 @@ function inputSeed(){
   function generateSunCharacteristics(skyCol){
     sunColor = [random(200, 255),random(200, 255),random(200, 255)]
     sunSize = random(width/20, width/6)
-    sunLocation = [random(width/7, width-width/7),random(0, height/2)]
-  }
+    sunLocation = [random(130, 570),random(50, 250)]
+    sunRayMinLength = sunSize*.4
+    sunRayMaxLength = sunSize*.8
+    sunRayWidth = sunSize *.05
+  }  
   
   function drawSun(c, s, loc){
-    noStroke()
-    fill(c)
-    circle(loc[0],loc[1], s)
+    layerMainGraphics.noStroke()
+    layerMainGraphics.fill(c)
+    layerMainGraphics.circle(loc[0],loc[1], s)
+  }
+
+  function drawSunRays(){
+    
+    sunLoopTimer +=1
+    if(sunLoopTimer>sunRayLoopTime){
+      sunLoopTimer=-sunRayLoopTime
+    }
+
+    //layerMainGraphics.fill(0)
+    //layerMainGraphics.circle(300,300,50)
+    
+    //layerMainGraphics.stroke(0)
+    //layerMainGraphics.strokeWeight(10)
+    //layerMainGraphics.line(200,300,500,300)
+
+    //console.log("Sunray count:" + sunRayAngles.length)
+    sunRayLength = lerp(sunRayMinLength,sunRayMaxLength,(abs(sunLoopTimer)/sunRayLoopTime))
+
+    for(r =0;r<sunRayAngles.length;r++){
+      rayColor = [sunColor[0],sunColor[1],sunColor[2],120]
+      layerMainGraphics.stroke(rayColor)
+      layerMainGraphics.strokeWeight(sunRayWidth)
+      
+      rayInfo = getSunRayData(degreesToRads(sunRayAngles[r]))
+      layerMainGraphics.line(rayInfo[0],rayInfo[1],rayInfo[2],rayInfo[3])
+      layerMainGraphics.strokeWeight(1)
+
+      sunRayAngles[r]+=sunSpinRate
+    }
+  }
+
+  function getSunRayData(angle){
+    
+    edgeX = ((sunSize/1.5)*Math.cos(angle)) + sunLocation[0]
+    edgeY = ((sunSize/1.5)* Math.sin(angle)) + sunLocation[1]
+
+    termX = (((sunSize/2)+sunRayLength)*Math.cos(angle)) + sunLocation[0]
+    termY = (((sunSize/2)+sunRayLength)* Math.sin(angle)) + sunLocation[1]
+
+    //console.log([edgeX,edgeY,termX,termY])
+
+    return [edgeX,edgeY,termX,termY]
+  }
+
+  function degreesToRads(degrees){
+    ret = degrees*(Math.PI/180)
+    return ret
   }
 
   function placePilesOnLeaf(xloc, yloc, radius, topHalfOnly){
     perim = 2*Math.PI*radius
     degreesPerStep = 360/perim
     points = []
-    counter=0
     for (b=0;b<perim;b++){
       xpos = (radius*Math.cos(b*degreesPerStep)) + xloc
       ypos = (radius* Math.sin(b*degreesPerStep)) + yloc
@@ -803,10 +926,9 @@ function inputSeed(){
       if((topHalfOnly&&ypos<yloc)||!topHalfOnly){
         //append(points,[xpos,ypos,0,3])
         append(snowPilePositions, [xpos,height-ypos,0,3])
-        counter+=1
       }
     }
-    console.log("Found " + counter + " points on circle")
+    //console.log("Found " + counter + " points on circle")
     return points
   }
   
