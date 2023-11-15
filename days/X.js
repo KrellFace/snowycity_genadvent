@@ -42,6 +42,8 @@ h1Seed = 0
 h2Seed = 0
 h3Seed = 0
 terrainCol = null
+darkerTerrain=null
+darkestTerrain=null
 buildingAnchorCol = []
 
 //Sun Logic
@@ -98,6 +100,9 @@ mainSeed = null;
 userSeed = null;
 seedDisplay=null;
 inp=null;
+
+
+
 function dayXPreload() {
 
     // Load any assets here (with assets.dayX at the front of the variable name)
@@ -130,28 +135,7 @@ class DayX extends Day {
     }
 
     prerun() {
-
-        // Initialise/reset variables here. Runs once, every time your day is viewed
-        //createCanvas(700,700);  
-  
-
-  
-        //Create UI bits
-        /*
-        let inpExplain = createDiv('Input Seed:');
-        inpExplain.style('font-size', '16px');
-        inpExplain.position(340,785);
-        
-        let button = createButton('New Town');
-        button.position(950,778);
-        //button.position(50, 50);
-        button.size(80,30)
-        button.mousePressed(initialise);
-        */
-
-        
-        
-        
+ 
         initialise()
         
     }
@@ -159,8 +143,6 @@ class DayX extends Day {
     update() {
 
       // Update and draw stuff here. Runs continuously (or only once if this.loop = false), while your day is being viewed
-      //console.log("Updating")
-      //background(200); // You can delete this line if you want
       if(allBuildingsDrawn!=true){
 
         buildingDrawIncrementer+=1
@@ -171,7 +153,7 @@ class DayX extends Day {
           buildingDrawIncrementer = 0
           
           if(buildingCounter>buildingData.length-1){
-            console.log("All buildings drawn")
+            //console.log("All buildings drawn")
             allBuildingsDrawn=true
           }
         }
@@ -186,7 +168,7 @@ class DayX extends Day {
         drawHill(h3Height, color(hill3Col), h3Seed)
     
         //Terrain Gen
-        drawTerrainBase(terrainHeight, terrainCol)
+        drawTerrainBase(terrainHeight, terrainCol, darkerTerrain, darkestTerrain)
     
         drawAllBuildings()
         //console.log(treeData.length)
@@ -211,7 +193,7 @@ class DayX extends Day {
           currWind-=1
         }
 
-        console.log("Wind mod:" + currWind)
+        //console.log("Wind mod:" + currWind)
     
         //Falling snow
         for(i=0;i<snowLocations.length;i++){
@@ -256,7 +238,8 @@ class DayX extends Day {
           if(b<snowPilePositions.length-1){
             rightDepth = abs(currDepth,snowPilePositions[b+1][2])
           }
-          if(absChange/2>random(0,1)&&leftDepth<3&&rightDepth<3){
+          //if(absChange/2>random(0,1)&&leftDepth<3&&rightDepth<3){
+            if(absChange/4>random(0,1)){   
           //Decrease depth
             if(snowChange<0){
                 //console.log("Decrease depth")
@@ -335,9 +318,6 @@ function initialise(){
         inp.remove()
     }
 
-
-
-
     if(userSeed!=null&&!isNaN(int(userSeed))){
         mainSeed = int(userSeed)
         userSeed=null
@@ -347,21 +327,6 @@ function initialise(){
         mainSeed = int(random(0,1000))
         console.log(mainSeed)
     }  
-
-    //Create UI bits
-    /*
-    seedDisplay = createDiv('Seed: ' +mainSeed);
-    seedDisplay.style('font-size', '16px',(255,255,255));
-    seedDisplay.style.color = (255,255,255)
-    seedDisplay.position(10, height-30);
-
-
-    inp = createInput('');
-    inp.position(width/2-40, height-30);
-    inp.size(100);
-    inp.input(inputSeed);
-    */
-
 
     //Generate Seed
     noiseSeed(mainSeed)
@@ -382,7 +347,7 @@ function initialise(){
 
     //Terrain Gen
     terrainHeight = random((height*(1/20)), (height*(1/15)))
-    drawTerrainBase(terrainHeight, terrainCol)
+    drawTerrainBase(terrainHeight, terrainCol, darkerTerrain, darkestTerrain)
 
     for(z=0;z<width;z++){
         append(snowPilePositions,[z,terrainHeight,0,100])
@@ -424,11 +389,6 @@ function inputSeed(){
          
     rect(bd[0]+(bd[1]/2)-(doorWidth/2), height-terrainHeight-doorHeight-1, doorWidth, doorHeight)
     
-    //Generating Windows
-    //horiWindowCount = floor((bd[1]-bWindowGap)/(bWindowWidth+bWindowGap))
-    //vertWindowCount = floor((bd[2]-doorHeight-bWindowGap)/(bWindowWidth+bWindowGap))
-    
-    //horiSideGap = (bd[1]-(horiWindowCount*(bWindowWidth+bWindowGap))+bWindowGap)/2
   
     wData = calcWindowData(bd[1],bd[2])
     horiWindowCount = wData[0]
@@ -466,9 +426,16 @@ function inputSeed(){
     }
   }
   
-  function drawTerrainBase(h, c){
-    fill(c)
+  function drawTerrainBase(h, c1,c2,c3){
+    noStroke()
+    fill(c1)
     rect(0, height-h, width, h)
+    noStroke()
+    fill(c2)
+    rect(0, height-(h*.6), width, h)
+    noStroke()
+    fill(c3)
+    rect(0, height-(h*.3), width, h) 
   }
   
   function generateColors(){  
@@ -479,21 +446,23 @@ function inputSeed(){
     h1Height = random((height*(1/3)), (height))
     
     //h1Height = random(700, 1000)
-    h1Cols = generateProximalColor(bgCols,30, 50, true)
-    hill1Col = color(h1Cols)
+    h1Cols = generateProximalColor(bgCols,30, 50, true) 
+    hill1Col = color(append(h1Cols,1000))
     
     h2Height = random((h1Height-((height-h1Height)*(1/50)), (h1Height-((height-h1Height)*(1/30)))))
-    //h2Height = random(h1Height-5, h1Height-10)
+    //h2Height = random(h1Height-5, h1Height-10)  
     h2Cols = generateProximalColor(h1Cols,30, 50, true)
-    hill2Col = color(h2Cols)
+    hill2Col = color(append(h2Cols,1000))
     
     h3Height = random((h2Height-((height-h2Height)*(1/50)), ((height-h2Height)-(height*(1/30)))))
     h3Cols = generateProximalColor(h2Cols,30, 50, true)
-    hill3Col = color(h3Cols)
-    
+    hill3Col = color(append(h3Cols,1000))
+     
     buildingAnchorCol = generateProximalColor(h3Cols, 100, 60)
     
     terrainCol = generateProximalColor(h3Cols,30, 50, true)
+    darkerTerrain=generateProximalColor(terrainCol,50,40, true)
+    darkestTerrain=generateProximalColor(darkerTerrain,50,40, true)
     
     
     treeLeafColor = generateProximalColor(buildingAnchorCol,80, 120)
@@ -523,11 +492,9 @@ function inputSeed(){
   
   function generateTreeParameters(){
     
-    //minTreeHeight = random((height*(1/40)), (height*(1/20)))
-    //maxTreeHeight = random(minTreeHeight+(height*(1/40)), maxTreeHeight+(height*(1/10)))
     maxTreeHeight = random(30,79)
     minTreeHeight = random(maxTreeHeight*.5,maxTreeHeight*.7)
-    minBranches = int(random(2,6))
+    minBranches = int(random(4,8))
     maxBranches = int(random(minBranches,minBranches+6))
     minYOffSetRatio = random(-0.4,0.4)
     maxYOffSetRatio = random(minYOffSetRatio-.1, minYOffSetRatio+.1)
@@ -544,13 +511,7 @@ function inputSeed(){
   }
    
   function generateBuildingData(){
-    //bCol = generateProximalColor(buildingAnchorCol,0,30)
-    console.log("Starting building data generation")
     for (i=0; i<width; i++){
-      //console.log("i:")
-      //console.log(i)
-      
-      //bCol = generateProximalColor(buildingAnchorCol,0,30)
       val = noise(i)
       genBuilding = false
       if(val<widthPortionBuildings){
@@ -582,16 +543,6 @@ function inputSeed(){
   }
   
   function generateTreeData(){
-    /*
-    
-    let minTreeX = 0
-    let minTreeHeight = 0
-    let maxTreeHeight = 0
-    let minBranches = 0
-    let maxBrances = 0
-    let minTreeGap = 0
-    let maxTreeGap = 0
-    */
     
     for (i=0; i<width; i++){
       //console.log("i:")
@@ -625,10 +576,22 @@ function inputSeed(){
         branchYOffsetRatio = random(minYOffSetRatio, maxYOffSetRatio)
         //Main stem
         append(branches,[i, treeBaseYLoc,i, treeTopYLoc,5])
-        append(leaves,[i, height-terrainHeight-treeHeight,treeHeight/3])
+        /*
+        //Big Leaf
+        append(leaves,[i, height-terrainHeight-(treeHeight*.7),treeHeight*.55])
+        //Med Leaf
+        append(leaves,[i, height-terrainHeight-(treeHeight*.85),treeHeight*.35])
+        //Small Leaf
+        append(leaves,[i, height-terrainHeight-(treeHeight*.95),treeHeight*.2])
+        */
+        //End leaf
+        append(leaves,[i, height-terrainHeight-(treeHeight*.95),treeHeight*.4])
+        placePilesOnLeaf(i,height-terrainHeight-(treeHeight*.95),  (treeHeight*.4)/2, true)
+        //snowPilePositions = concat(snowPilePositions, endPoints)
+
         //Sub branches
         branchMinRoot = treeBaseYLoc-(treeHeight*.2)
-        maxBranchXLength = (treeHeight*.6)
+        maxBranchXLength = (treeHeight*.5)
         prevBranchLeft = false
         for(q=0;q<branchCount;q++){
           gapToTop = treeTopYLoc-branchMinRoot
@@ -640,9 +603,22 @@ function inputSeed(){
           }
           prevBranchLeft=!prevBranchLeft    
           
+          
           append(branches,[i, root,i+branchXLength, root+branchY ,3])
-          append(leaves,[i+(branchXLength*.7), root+(branchY*.7),branchXLength*.8])
-          maxBranchXLength=branchXLength
+          /*
+          //Big Leaf
+          append(leaves,[i+(branchXLength*.4), root+(branchY*.4),branchXLength*.8])
+          //Med Leaf
+          append(leaves,[i+(branchXLength*.65), root+(branchY*.65),branchXLength*.5])
+          //Small Leaf
+          append(leaves,[i+(branchXLength*.95), root+(branchY*.95),branchXLength*.3])
+          */
+          //End leaf
+          append(leaves,[i+(branchXLength*.95), root+(branchY*.95),branchXLength*.6])
+          cachedLength = branchXLength
+          //console.log("Cached length: " + cachedLength)
+          placePilesOnLeaf(i+(cachedLength*.95),root+(branchY*.95), abs((cachedLength*.6)/2), true)
+          maxBranchXLength=abs(branchXLength)
           branchMinRoot=root
         }
 
@@ -813,5 +789,24 @@ function inputSeed(){
     noStroke()
     fill(c)
     circle(loc[0],loc[1], s)
+  }
+
+  function placePilesOnLeaf(xloc, yloc, radius, topHalfOnly){
+    perim = 2*Math.PI*radius
+    degreesPerStep = 360/perim
+    points = []
+    counter=0
+    for (b=0;b<perim;b++){
+      xpos = (radius*Math.cos(b*degreesPerStep)) + xloc
+      ypos = (radius* Math.sin(b*degreesPerStep)) + yloc
+      //console.log("Point on radius found: " + xpos +"," +ypos)
+      if((topHalfOnly&&ypos<yloc)||!topHalfOnly){
+        //append(points,[xpos,ypos,0,3])
+        append(snowPilePositions, [xpos,height-ypos,0,3])
+        counter+=1
+      }
+    }
+    console.log("Found " + counter + " points on circle")
+    return points
   }
   
