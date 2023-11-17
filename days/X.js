@@ -1,10 +1,10 @@
-// Made by Firstname Lastname (keep this line and replace with your name)
-
+// Made by Ollie Withington (keep this line and replace with your name)
 
 //Layers
-layerMainGraphics = null
-layerSnowGlobe = null
-pg = null
+let layerMainGraphics = null
+let layerSnowGlobe = null
+let layerUI = null
+let layerGlobeHighlight = null
 
 //Terrain Variables
 
@@ -12,7 +12,6 @@ let terrainHeight = 0
 
 //Buildings Variables
 let minBuildingX = 0
-
 
 let minBuildHeight = 0
 let maxBuildHeight = 0
@@ -24,79 +23,76 @@ let maxBuildGap = 0
 let widthPortionBuildings = 0
 let buildingData = []
 
-
 let buildingDrawRate = 2
 let buildingDrawIncrementer = 0
 let buildingCounter = 0
 let allBuildingsDrawn = null
 
-doorHeight = 0
-doorWidth = 0
+let doorHeight = 0
+let doorWidth = 0
 
-bWindowHeight = 0
-bWindowWidth = 0
-bWindowGap = 0
+let bWindowHeight = 0
+let bWindowWidth = 0
+let bWindowGap = 0
 
 //Terrain
-bgCol = null
-hill1Col = null
-hill2Col = null
-hill3Col = null
-h1Height = 0
-h2Height = 0
-h3Height = 0
-h1Seed = 0
-h2Seed = 0
-h3Seed = 0
-terrainCol = null
-darkerTerrain=null
-darkestTerrain=null
-buildingAnchorCol = []
+let bgCol = null
+let hill1Col = null
+let hill2Col = null
+let hill3Col = null
+let h1Height = 0
+let h2Height = 0
+let h3Height = 0
+let h1Seed = 0
+let h2Seed = 0
+let h3Seed = 0
+let terrainCol = null
+let darkerTerrain=null
+let darkestTerrain=null
+let buildingAnchorCol = []
 
 //Amount of space either side occupied by snow globe
-globeEdgeTrim=130
+const globeEdgeTrim=130
 
 //Sun Logic
-sunColor = []
-sunSize = 0 
-sunLocation = [] 
+let sunColor = []
+let sunSize = 0 
+let sunLocation = [] 
 
-sunRayLoopTime = 100
-sunLoopTimer = 0
+const sunRayLoopTime = 100
+let sunLoopTimer = 0
 
-sunRayWidth = 5
-sunRayLength = 0
-sunRayMinLength = 0
-sunRayMaxLength = 0
-sunSpinRate = 0.3
+let sunRayWidth = 0
+let sunRayLength = 0
+let sunRayMinLength = 0
+let sunRayMaxLength = 0
+const sunSpinRate = 0.3
 
-sunRayAngles = [0,45,90,135,180,225,270,315,360]
-
+let sunRayAngles = [0,45,90,135,180,225,270,315,360]
 
 //Snow Logic
-snowLocations = []
-snowDensity = 0.4
-snowDensityModifier = 0.05
-snowFallingRate = 5
-snowNoiseScale = 0.25
-snowSwirlAmount = 10
-swirlScale = 0.05
-swirlChaosMod = 20
+let snowLocations = []
+const snowDensity = 0.4
+const snowDensityModifier = 0.05
+const snowFallingRate = 5
+const snowNoiseScale = 0.25
+const snowSwirlAmount = 10
+const swirlScale = 0.05
+const swirlChaosMod = 20
 
-currWind = 0;
-maxWind = 20;
-windMod = 0.5
-blowingLeft = false;
-blowingRight = false;
+let currWind = 0;
+const maxWind = 20;
+let windMod = 0.5
+let blowingLeft = false;
+let blowingRight = false;
 
 //Snow Piles Logic
 
-snowPilePositions=[]
-accumulatingSnow= false
-snowPileNoiseScale = 0.08
+let snowPilePositions=[]
+let accumulatingSnow= false
+const snowPileNoiseScale = 0.08
 
-prevBuilding=[]
-
+let prevDrawnBuilding=[]
 
 //Trees
 let minTreeX = 0
@@ -112,17 +108,28 @@ let widthPortionTree = 0
 
 let treeData = []
 
-treeBranchColor = null
-treeLeafColor = null
+let treeBranchColor = null 
+let treeLeafColor = null
+
+//Shake
+let shaking = false
+let shakeMaxXlim=30
+let shakeXlim=10
+let shakeCurrOffset = 0
+let shakeTimeLoop = 5
+let shakeLoopTimer = 0
+let shakeTotalTime = 100
+let shakeTotalTimer = 0
+let shakeMaxSnowUpSpeed = 10
+let shakeUpSnowSpeedMod=0
+let shakeMaxSnowSideSpeed = 40
+let shakeCurrMaxSnowSideSpeed = 0
+let shakeSnowSideSpeedMod = 0
 
 // Seed storage
 
-mainSeed = null;
-userSeed = null;
-seedDisplay=null;
-inp=null;
-
-
+let mainSeed = null;
+let userSeed = "";
 
 function dayXPreload() {
 
@@ -138,37 +145,29 @@ class DayX extends Day {
         super();
         this.loop = true; // Set to true or false
 
-        this.controls = "Press the left or right arrow keys to control the wind. Press Spacebar to generate a new town"; // Write any controls for interactivity if needed or leave blank
+        this.controls = " Press Spacebar to generate a new town, control the wind with the Left and Right arrow key, and press Enter to shake the globe. You can also manually enter a town ID before pressing space to generate a specific globe. Don't forget to make a note of ones you like!"; // Write any controls for interactivity if needed or leave blank
         this.credits = "Made by Ollie Withington"; // Replace with your name
 
         // Define variables here. Runs once during the sketch holder setup
-        /* 
-        let inpExplain = createDiv('Input Seed:');
-        inpExplain.style('font-size', '16px');
-        inpExplain.position(340,785);
-        
-        let button = createButton('New Town');
-        button.position(950,778);
-        //button.position(50, 50);
-        button.size(80,30)
-        button.mousePressed(initialise);
-        */
         layerMainGraphics = createGraphics(700, 700)
         layerSnowGlobe = createGraphics(700, 700) 
-        pg =createGraphics(200, 200);
+        layerUI = createGraphics(700, 700) 
+        layerGlobeHighlight =createGraphics(700, 700);
     }
 
     prerun() {
-        //layerMainGraphics = createGraphics(width, height)
-        //layerSnowGlobe = createGraphics(width, height) 
         initialise()
         
     }
 
     update() {
 
+      //console.log("User seed:" + userSeed)
+      console.log("Total snow locations: " + snowLocations.length)
+
       // Update and draw stuff here. Runs continuously (or only once if this.loop = false), while your day is being viewed
-      if(allBuildingsDrawn!=true){
+      //if(allBuildingsDrawn!=true){
+      if(false){
 
         buildingDrawIncrementer+=1
         if(buildingDrawIncrementer>buildingDrawRate){
@@ -219,28 +218,25 @@ class DayX extends Day {
           currWind-=1
         }
 
-        //console.log("Wind mod:" + currWind)
-    
         //Falling snow
         for(i=0;i<snowLocations.length;i++){
           //console.log(snowLocations[i])
-          snowLocations[i][1]+=snowFallingRate
-          let chaos = random(-swirlChaosMod,swirlChaosMod)
-          let swirl = (noise(((snowLocations[i][0]+chaos)*swirlScale),((snowLocations[i][1]+chaos)*swirlScale),(frameCount*swirlScale))*snowSwirlAmount)-(snowSwirlAmount/2)
+          snowLocations[i][1]+=(snowFallingRate-shakeUpSnowSpeedMod)
+          var chaos = random(-swirlChaosMod,swirlChaosMod)
+          var swirl = (noise(((snowLocations[i][0]+chaos)*swirlScale),((snowLocations[i][1]+chaos)*swirlScale),(frameCount*swirlScale))*snowSwirlAmount)-(snowSwirlAmount/2)
   
-          //swirl+=random(-swirlChaosMod,swirlChaosMod)
-          snowLocations[i][0]+=(swirl+(currWind*windMod))
+          snowLocations[i][0]+=((swirl*max(shakeSnowSideSpeedMod,1))+(currWind*windMod))
           layerMainGraphics.fill(255,255,255)
           layerMainGraphics.noStroke()
           //stroke(255)
           layerMainGraphics.circle(snowLocations[i][0], snowLocations[i][1], random(1,5));
-          //point(snowLocations[i][0], snowLocations[i][1])
-          if(snowLocations[i][1]>(height-terrainHeight-3)){
+          var belowTerrain = snowLocations[i][1]>(height-terrainHeight-3)
+          var aboveGlobe = snowLocations[i][1]<(0)
+          if(belowTerrain||aboveGlobe){
             //snowLocations.shift()
             snowLocations.splice(i, 1)
-            if(!accumulatingSnow){
+            if(!accumulatingSnow&&belowTerrain){
                 accumulatingSnow=true
-                
             }
           }
         }
@@ -248,57 +244,87 @@ class DayX extends Day {
       }
         
       if(accumulatingSnow){
-        for(let b=0;b<snowPilePositions.length;b++){
+        for(var i=0;i<snowPilePositions.length;i++){
             
-          let snowChange = noise(frameCount*snowPileNoiseScale*0.1, snowPilePositions[b][0]*snowPileNoiseScale, snowPilePositions[b][1]*snowPileNoiseScale)
+          var snowChange = noise(frameCount*snowPileNoiseScale*0.1, snowPilePositions[i][0]*snowPileNoiseScale, snowPilePositions[i][1]*snowPileNoiseScale)
           //console.log(snowChange)
           snowChange-=.48
-          let absChange = abs(snowChange)
+          var absChange = abs(snowChange)
           //console.log(snowChange)
-          let currDepth = snowPilePositions[b][2]
-          let maxDepth = snowPilePositions[b][3]
-          let leftDepth = 0
-          if(b!=0){
-            leftDepth = abs(currDepth,snowPilePositions[b-1][2])
+          var currDepth = snowPilePositions[i][2]
+          var maxDepth = snowPilePositions[i][3]
+          var leftDepth = 0
+          if(i!=0){
+            leftDepth = abs(currDepth,snowPilePositions[i-1][2])
           }
-          let rightDepth = 0
-          if(b<snowPilePositions.length-1){
-            rightDepth = abs(currDepth,snowPilePositions[b+1][2])
+          var rightDepth = 0
+          if(i<snowPilePositions.length-1){
+            rightDepth = abs(currDepth,snowPilePositions[i+1][2])
           }
           //if(absChange/2>random(0,1)&&leftDepth<3&&rightDepth<3){
-            if(absChange/4>random(0,1)){   
+          if(absChange/2>random(0,1)){   
           //Decrease depth
             if(snowChange<0){
                 //console.log("Decrease depth")
-                snowPilePositions[b][2] = max(currDepth-1, 2)
+                snowPilePositions[i][2] = max(currDepth-1, 0)
             }
             else{
-                snowPilePositions[b][2] = min(currDepth+1, maxDepth)
+                snowPilePositions[i][2] = min(currDepth+1, maxDepth)
             }
           }
           
           //Draw snow
           layerMainGraphics.stroke([255,255,255])
-          layerMainGraphics.line(snowPilePositions[b][0],height-snowPilePositions[b][1],snowPilePositions[b][0],height-snowPilePositions[b][1]-snowPilePositions[b][2])
+          layerMainGraphics.line(snowPilePositions[i][0],height-snowPilePositions[i][1],snowPilePositions[i][0],height-snowPilePositions[i][1]-snowPilePositions[i][2])
         }  
       }
+
       //Draw trees last so they are in front of snowy windows
       treeData.forEach(drawTree)
       layerMainGraphics.strokeWeight(1)  
       
+
+      //Snow globe main rim
       layerSnowGlobe.background(30)
       layerSnowGlobe.stroke([217,242,255])
-      layerSnowGlobe.strokeWeight(10)
       //layerSnowGlobe.noFill()
-      layerSnowGlobe.circle(width/2,height/2,656)
+      layerSnowGlobe.strokeWeight(11)
+      layerSnowGlobe.circle(width/2,height/2,655)
+
+      //Snow globe sunlit rim
+      layerSnowGlobe.stroke(sunColor)
+      layerSnowGlobe.strokeWeight(3)
+      layerSnowGlobe.circle(width/2,height/2,655)
+
       layerSnowGlobe.strokeWeight(1)
-         
+        
+      //Snow globe cut out
+      
+      
       layerSnowGlobe.erase()
-      layerSnowGlobe.circle(width/2,height/2,650)
+      layerSnowGlobe.noStroke()
+      layerSnowGlobe.circle(width/2,height/2,653)
       layerSnowGlobe.noErase()
       
+
+
+      //Globe light highlight
+      
+      /*
+      layerGlobeHighlight = createGraphics(700, 700)  
+      
+      layerGlobeHighlight.fill([255,255,255,20])
+      layerGlobeHighlight.noStroke()
+      layerGlobeHighlight.circle((width/2)+20,(height/2)-20,550)
+
+      layerGlobeHighlight.erase()
+      layerGlobeHighlight.noStroke()
+      layerGlobeHighlight.circle((width/2)+20,(height/2)-20,500)
+      layerGlobeHighlight.noErase()
+      */
+      
       //Draw wood base
-      layerSnowGlobe.fill([156,96,44])
+      layerSnowGlobe.fill([156,96,44]) 
       layerSnowGlobe.stroke([122,77,37])
       layerSnowGlobe.rect(160,630,380,70)
 
@@ -307,18 +333,38 @@ class DayX extends Day {
       layerSnowGlobe.rect(120,650,460,50)
 
       //Draw Gold Plaque
+
+      layerSnowGlobe.fill([99, 76, 37])
+      layerSnowGlobe.noStroke()
+      layerSnowGlobe.strokeWeight(1)
+      layerSnowGlobe.rect(147,657,406,36)
       
-      layerSnowGlobe.fill([227, 177, 50])
-      layerSnowGlobe.stroke([191, 151, 50])
+      layerSnowGlobe.fill([156, 112, 37])
+      layerSnowGlobe.stroke([82, 59, 20])
       layerSnowGlobe.strokeWeight(1)
       layerSnowGlobe.rect(150,660,400,30)
 
+      
+
       //Draw Globe Text
-      layerSnowGlobe.fill([125, 100, 37])
+      
+      layerSnowGlobe.fill([43, 34, 18])
       layerSnowGlobe.noStroke()
       layerSnowGlobe.textSize(24);
-      layerSnowGlobe.text('City #' + mainSeed, 300, 682);
+      layerSnowGlobe.text('Town #' + mainSeed, 290, 682);
 
+      //Draw Curr User input
+
+
+      //layerUI = createGraphics(700, 700) 
+      layerUI.fill(80)
+      layerUI.rect(7,14,155,40)
+      layerUI.fill(220)
+      //layerUI.noStroke()
+      layerUI.textSize(24);223
+      layerUI.text('Seed: ' + userSeed, 10, 40);
+      
+      
 
 
       //layerMainGraphics.background=([0,0,0])
@@ -326,11 +372,16 @@ class DayX extends Day {
       //layerMainGraphics.circle(width/2,height/2,700)
 
       //image(layerMainGraphics,700, 700)
+      if(shaking){
+        shake()
 
-
+      }
+      //console.log(shakeCurrOffset)
      
-      image(layerMainGraphics,0,0)
-      image(layerSnowGlobe,0,0)
+      image(layerMainGraphics,shakeCurrOffset,0)
+      image(layerSnowGlobe,shakeCurrOffset,0)
+      image(layerGlobeHighlight,shakeCurrOffset,0)
+      image(layerUI,0,0)
     }
 
     // Below are optional functions for interactivity. They can be deleted from this file if you want
@@ -352,6 +403,49 @@ class DayX extends Day {
       }
       else if(keyCode == LEFT_ARROW){
         blowingLeft = true
+      }
+      else if(keyCode == LEFT_ARROW){
+        blowingLeft = true
+      }
+      //Numeric
+      else if(keyCode==13){
+        shaking=true
+      }
+      else if(keyCode==49){
+        console.log("1 pressed")
+        addToUserSeedInput("1")
+      }
+      else if(keyCode==50){
+        console.log("2 pressed")
+        addToUserSeedInput("2")
+      }
+      else if(keyCode==51){
+        console.log("3 pressed")
+        addToUserSeedInput("3")
+      }
+      else if(keyCode==52){
+        console.log("4 pressed")
+        addToUserSeedInput("4")
+      }
+      else if(keyCode==53){
+        console.log("5 pressed")
+        addToUserSeedInput("5")
+      }
+      else if(keyCode==54){
+        console.log("6 pressed")
+        addToUserSeedInput("6")
+      }
+      else if(keyCode==55){
+        console.log("7 pressed")
+        addToUserSeedInput("7")
+      }
+      else if(keyCode==56){
+        console.log("8 pressed")
+        addToUserSeedInput("8")
+      }
+      else if(keyCode==57){1
+        console.log("9 pressed")
+        addToUserSeedInput("9")
       }
 
     }
@@ -384,22 +478,16 @@ function initialise(){
     snowLocations=[]
     snowPilePositions=[]
     accumulatingSnow=false  
-    if(seedDisplay!=null){
-        seedDisplay.remove()
-    }
-    if(inp!=null){ 
-        inp.remove()
-    }
 
     if(userSeed!=null&&!isNaN(int(userSeed))){
         mainSeed = int(userSeed)
-        userSeed=null
-        inp.value=''
+        
     }
     else{
         mainSeed = int(random(0,10000))
-        console.log(mainSeed)
+        console.log(mainSeed) 
     }  
+    userSeed=""
 
     //Generate Seed
     noiseSeed(mainSeed)
@@ -414,7 +502,7 @@ function initialise(){
 
     h1Seed = random(0,1000)
     h2Seed = h1Seed+500
-    h3Seed = h3Seed+1000
+    h3Seed = h2Seed+1000
 
     generateAllHills()
 
@@ -439,21 +527,21 @@ function initialise(){
     initialiseSnowLocations()
     }
 
-
+/*
 function inputSeed(){
     console.log('you are typing: ', this.value());
     userSeed=this.value()
   }
-  
+  */
   function drawBuilding(bd){
   
     //Generate base building
-    bOutlineCol = [bd[3][0]-10, bd[3][1]-10,bd[3][2]-10]
+    var bOutlineCol = [bd[3][0]-10, bd[3][1]-10,bd[3][2]-10]
     
     layerMainGraphics.stroke(bOutlineCol)
     layerMainGraphics.fill(bd[3])
     
-    buildYloc = height-terrainHeight-bd[2]-1
+    var buildYloc = height-terrainHeight-bd[2]-1
     
     layerMainGraphics.rect(bd[0], buildYloc, bd[1], bd[2])
     
@@ -463,17 +551,17 @@ function inputSeed(){
     layerMainGraphics.rect(bd[0]+(bd[1]/2)-(doorWidth/2), height-terrainHeight-doorHeight-1, doorWidth, doorHeight)
     
   
-    wData = calcWindowData(bd[1],bd[2])
-    horiWindowCount = wData[0]
-    vertWindowCount = wData[1]
-    horiSideGap = wData[2]
+    var wData = calcWindowData(bd[1],bd[2])
+    var horiWindowCount = wData[0]
+    var vertWindowCount = wData[1]
+    var horiSideGap = wData[2]
     
     
     for (x=0;x<horiWindowCount;x++){
       for (y=0;y<vertWindowCount;y++){
-        
-        xloc = bd[0]+horiSideGap+(x*(bWindowWidth+bWindowGap))
-        yloc = buildYloc+bWindowGap+(y*(bWindowWidth+bWindowGap))
+          
+        var xloc = bd[0]+horiSideGap+(x*(bWindowWidth+bWindowGap))
+        var yloc = buildYloc+bWindowGap+(y*(bWindowWidth+bWindowGap))
         layerMainGraphics.fill(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50))
         layerMainGraphics.rect(xloc, yloc, bWindowWidth, bWindowWidth)
         
@@ -485,10 +573,10 @@ function inputSeed(){
   }
   
   function calcWindowData(houseWidth, houseHeight){
-    horiWindowCount = floor((houseWidth-bWindowGap)/(bWindowWidth+bWindowGap))
-    vertWindowCount = floor((houseHeight-doorHeight-bWindowGap)/(bWindowWidth+bWindowGap))
+    var horiWindowCount = floor((houseWidth-bWindowGap)/(bWindowWidth+bWindowGap))
+    var vertWindowCount = floor((houseHeight-doorHeight-bWindowGap)/(bWindowWidth+bWindowGap))
     
-    horiSideGap = (houseWidth-(horiWindowCount*(bWindowWidth+bWindowGap))+bWindowGap)/2
+    var horiSideGap = (houseWidth-(horiWindowCount*(bWindowWidth+bWindowGap))+bWindowGap)/2
     
     return [horiWindowCount,vertWindowCount,horiSideGap]
   }
@@ -556,7 +644,6 @@ function inputSeed(){
     doorWidth = minBuildWidth/3
     doorHeight = min((doorWidth*3),minBuildHeight/2)
     
-  
     bWindowHeight = doorWidth
     bWindowWidth = doorWidth
     bWindowGap = doorWidth/2
@@ -617,12 +704,12 @@ function inputSeed(){
   
   function generateTreeData(){
     
-    for (i=globeEdgeTrim; i<width-globeEdgeTrim; i++){
+    for (var i=globeEdgeTrim; i<width-globeEdgeTrim; i++){
       //console.log("i:")
       //console.log(i)
       
-      val = noise(i+1000)   
-      genTree= false
+      var val = noise(i+1000)   
+      var genTree= false
       if(val<widthPortionTree){
         //Clunky handling for only checking the gap if there is already a building added
         if(treeData.length>0){
@@ -638,15 +725,15 @@ function inputSeed(){
       }
       if(genTree){
         //HACK - I reverts to value of 2 after appending to dict
-        generationLoc = i
-        branches = []
-        leaves = []
-        treeHeight = random(minTreeHeight,maxTreeHeight)
-        branchCount = int(random(minBranches, maxBranches))
-        treeBaseYLoc = height-terrainHeight
-        treeTopYLoc = height-terrainHeight-treeHeight
+        var generationLoc = i
+        var branches = []
+        var leaves = []
+        var treeHeight = random(minTreeHeight,maxTreeHeight)
+        var branchCount = int(random(minBranches, maxBranches))
+        var treeBaseYLoc = height-terrainHeight
+        var treeTopYLoc = height-terrainHeight-treeHeight
 
-        branchYOffsetRatio = random(minYOffSetRatio, maxYOffSetRatio)
+        var branchYOffsetRatio = random(minYOffSetRatio, maxYOffSetRatio)
         //Main stem
         append(branches,[i, treeBaseYLoc,i, treeTopYLoc,5])
         /*
@@ -663,14 +750,14 @@ function inputSeed(){
         //snowPilePositions = concat(snowPilePositions, endPoints)
 
         //Sub branches
-        branchMinRoot = treeBaseYLoc-(treeHeight*.2)
-        maxBranchXLength = (treeHeight*.5)
-        prevBranchLeft = false
+        var branchMinRoot = treeBaseYLoc-(treeHeight*.2)
+        var maxBranchXLength = (treeHeight*.5)
+        var prevBranchLeft = false
         for(q=0;q<branchCount;q++){
-          gapToTop = treeTopYLoc-branchMinRoot
-          root = random(branchMinRoot,branchMinRoot+(gapToTop/2))
-          branchXLength = random(maxBranchXLength/2, maxBranchXLength)
-          branchY = abs(branchXLength)*branchYOffsetRatio
+          var gapToTop = treeTopYLoc-branchMinRoot
+          var root = random(branchMinRoot,branchMinRoot+(gapToTop/2))
+          var branchXLength = random(maxBranchXLength/2, maxBranchXLength)
+          var branchY = abs(branchXLength)*branchYOffsetRatio
           if(!prevBranchLeft){
             branchXLength=-branchXLength
           }
@@ -688,14 +775,14 @@ function inputSeed(){
           */
           //End leaf
           append(leaves,[i+(branchXLength*.95), root+(branchY*.95),branchXLength*.6])
-          cachedLength = branchXLength
+          var cachedLength = branchXLength
           //console.log("Cached length: " + cachedLength)
           placePilesOnLeaf(i+(cachedLength*.95),root+(branchY*.95), abs((cachedLength*.6)/2), true)
           maxBranchXLength=abs(branchXLength)
           branchMinRoot=root
         }
 
-        td = [branches,leaves]
+        var td = [branches,leaves]
         append(treeData,td)
         
         
@@ -723,38 +810,37 @@ function inputSeed(){
   
   function generateSnowPileDataForBuilding(bd){
     //Updating snow height map
-    bx1 = bd[0]
-    bWidth = bd[1]
-    bHeight = bd[2]
+    var bx1 = bd[0]
+    var bWidth = bd[1]
+    var bHeight = bd[2]
     
-    
-    by1=(bHeight+terrainHeight)
-    bx2=bx1+bWidth
-    by2=terrainHeight
+    var by1=(bHeight+terrainHeight)
+    var bx2=bx1+bWidth
+    var by2=terrainHeight
     
     //Roof snow piles
     
     for(k=bx1;k<(bx1+bWidth);k++){ 
       
-      if(!(k>prevBuilding[0]&&k<prevBuilding[2]&&by1<prevBuilding[1]&&by1>prevBuilding[3])){
+      if(!(k>prevDrawnBuilding[0]&&k<prevDrawnBuilding[2]&&by1<prevDrawnBuilding[1]&&by1>prevDrawnBuilding[3])){
         
         append(snowPilePositions,[k,by1,0,5])
       }
     }
   
-    wData = calcWindowData(bd[1],bd[2])
-    horiWindowCount = wData[0]
-    vertWindowCount = wData[1]
-    horiSideGap = wData[2]
+    var wData = calcWindowData(bd[1],bd[2])
+    var horiWindowCount = wData[0]
+    var vertWindowCount = wData[1]
+    var horiSideGap = wData[2]
   
   
     for (x=0;x<horiWindowCount;x++){
       for (y=0;y<vertWindowCount;y++){
         for(w=0;w<bWindowWidth;w++){
           
-          xLoc=bx1+horiSideGap+(x*(bWindowWidth+bWindowGap))+w
-          yLoc = by1-bWindowGap-(y*(bWindowWidth+bWindowGap))-bWindowWidth
-          if(!(xLoc>prevBuilding[0]&&xLoc<prevBuilding[2]&&yLoc<prevBuilding[1]&&yLoc>prevBuilding[3])){
+          var xLoc=bx1+horiSideGap+(x*(bWindowWidth+bWindowGap))+w
+          var yLoc = by1-bWindowGap-(y*(bWindowWidth+bWindowGap))-bWindowWidth
+          if(!(xLoc>prevDrawnBuilding[0]&&xLoc<prevDrawnBuilding[2]&&yLoc<prevDrawnBuilding[1]&&yLoc>prevDrawnBuilding[3])){
             append(snowPilePositions,[xLoc,yLoc,0, 4])
           }
           
@@ -763,14 +849,14 @@ function inputSeed(){
   
     }
     
-    prevBuilding = [bx1,by1,bx2,by2]
+    prevDrawnBuilding = [bx1,by1,bx2,by2]
   }
   
   function generateProximalColor(col, minDist, maxDistPerVal, darkerOnly = false, lighterOnly = false){
     //console.log("Generating proximal color")
-    generated = false
-    returnVal = []
-    loopBreak = 0
+    var generated = false
+    var returnVal = []
+    var loopBreak = 0
     while  (!generated){
       if(darkerOnly){
       returnVal = [random(max((col[0]-maxDistPerVal),0),col[0]),
@@ -789,7 +875,7 @@ function inputSeed(){
         random(max((col[2]-maxDistPerVal),0), min((col[2]+maxDistPerVal),255))]
       }
       
-      s= 0
+      var s= 0
       for(i = 0; i<2;i++){
         s+=abs(returnVal[i]-col[i])
       }
@@ -809,13 +895,13 @@ function inputSeed(){
   
   function drawHill(h, col, seed){
   
-    let noiseScale = 0.006;
+    var noiseScale = 0.006;
     for (let x = 0; x < width; x += 1) {
       // Scale input coordinates.
-      let nx = noiseScale * x;
-      let nt = noiseScale * seed;
+      var nx = noiseScale * x;
+      var nt = noiseScale * seed;
       // Compute noise value.
-      let y = h * noise(nx, nt);
+      var y = h * noise(nx, nt);
       // Render.
       layerMainGraphics.stroke(col)
       layerMainGraphics.line(x, height, x, height-y);
@@ -824,15 +910,15 @@ function inputSeed(){
   
   function initialiseSnowLocations(){
     //console.log("Generating snow locations ")
-    newLocs = []
-    sideLocs = []
-    allAdditions=[]
+    var newLocs = []
+    var sideLocs = []
+    var allAdditions=[]
     for (i=0; i<width;i++){
       if((noise((i*snowNoiseScale),(frameCount*snowNoiseScale))<snowDensity)&&(random(0,1)<snowDensityModifier)){
         append(newLocs, [i,0])
       }
     }
-    if(currWind>0){
+    if(currWind>0||shaking){
       for (y=0; y<height-terrainHeight;y++){
         if((noise((y*snowNoiseScale),(frameCount*snowNoiseScale))<snowDensity)&&(random(0,1)<snowDensityModifier)){
           append(sideLocs, [0,y])
@@ -840,7 +926,7 @@ function inputSeed(){
       }
       //snowLocations = concat(snowLocations, sideLocs)
     }
-    else if(currWind<0){
+    else if(currWind<0||shaking){
       for (y=0; y<height-terrainHeight;y++){
         if((noise((y*snowNoiseScale),(frameCount*snowNoiseScale))<snowDensity)&&(random(0,1)<snowDensityModifier)){
           append(sideLocs, [width,y])
@@ -848,7 +934,19 @@ function inputSeed(){
       }
       //snowLocations = concat(snowLocations, sideLocs)
     }
-    allAdditions=concat(sideLocs, newLocs)
+
+    if(shaking&&accumulatingSnow){
+      
+
+      //console.log("Spawning shaken up snow")
+      for (i=0; i<width;i++){
+        if((noise((i*snowNoiseScale),(frameCount*snowNoiseScale))<snowDensity)&&(random(0,1)<snowDensityModifier)){
+          append(newLocs, [i,height-terrainHeight-2])
+          //console.log("Spawnig shaken up snow")
+        }
+      }
+    }
+    var allAdditions=concat(sideLocs, newLocs)
     snowLocations = concat(snowLocations, allAdditions)
   }
   
@@ -885,11 +983,11 @@ function inputSeed(){
     sunRayLength = lerp(sunRayMinLength,sunRayMaxLength,(abs(sunLoopTimer)/sunRayLoopTime))
 
     for(r =0;r<sunRayAngles.length;r++){
-      rayColor = [sunColor[0],sunColor[1],sunColor[2],120]
+      var rayColor = [sunColor[0],sunColor[1],sunColor[2],120]
       layerMainGraphics.stroke(rayColor)
       layerMainGraphics.strokeWeight(sunRayWidth)
-      
-      rayInfo = getSunRayData(degreesToRads(sunRayAngles[r]))
+       
+      var rayInfo = getSunRayData(degreesToRads(sunRayAngles[r]))
       layerMainGraphics.line(rayInfo[0],rayInfo[1],rayInfo[2],rayInfo[3])
       layerMainGraphics.strokeWeight(1)
 
@@ -897,13 +995,61 @@ function inputSeed(){
     }
   }
 
+  function shake(){
+    
+    shakeLoopTimer +=1
+    shakeTotalTimer+=1
+    //console.log("Shake timer: " + shakeLoopTimer)
+    
+    //Timing the back and fourth shakes
+    if(shakeLoopTimer>shakeTimeLoop){
+      shakeLoopTimer=-shakeTimeLoop
+    }
+    //Updating the limit of the shaking animation to decrease during the shake
+    shakeXlim=lerp(shakeMaxXlim,0,(shakeTotalTimer/shakeTotalTime))
+
+    //Actual shake animation
+    shakeCurrOffset = lerp(-shakeXlim,shakeXlim,(abs(shakeLoopTimer)/shakeTimeLoop))
+
+    //Update limit of side to side snow speed
+    shakeCurrMaxSnowSideSpeed =lerp(shakeMaxSnowSideSpeed,0,(shakeTotalTimer/shakeTotalTime))
+
+    //Update actual side to side snow speed
+    shakeSnowSideSpeedMod = lerp(shakeCurrMaxSnowSideSpeed,-shakeCurrMaxSnowSideSpeed,(abs(shakeLoopTimer)/shakeTimeLoop))
+    
+    //Update actual uplift snow speed
+    shakeUpSnowSpeedMod= max(lerp(shakeMaxSnowUpSpeed,0,(abs(shakeTotalTimer-1)/(shakeTotalTime/2))),0)
+
+    //Update accumulated snow
+    if(shakeTotalTimer<20){
+      //console.log("This should run a bunch")
+
+      for(u=0;u<snowPilePositions.length;u++){
+        let snowReduction = noise(frameCount*snowPileNoiseScale*0.1, snowPilePositions[u][0]*snowPileNoiseScale, snowPilePositions[u][1]*snowPileNoiseScale)
+        if(snowReduction<0.9){
+          thisDepth = snowPilePositions[u][2]
+          snowPilePositions[u][2] = max(thisDepth-1, 0)
+        }
+      }
+
+    }  
+
+    //Timing the overall shake time
+    if(shakeTotalTimer>shakeTotalTime){
+      shakeTotalTimer=0
+      shaking=false
+      shakeCurrOffset=0
+    }
+
+  }
+
   function getSunRayData(angle){
     
-    edgeX = ((sunSize/1.5)*Math.cos(angle)) + sunLocation[0]
-    edgeY = ((sunSize/1.5)* Math.sin(angle)) + sunLocation[1]
+    var edgeX = ((sunSize/1.5)*Math.cos(angle)) + sunLocation[0]
+    var edgeY = ((sunSize/1.5)* Math.sin(angle)) + sunLocation[1]
 
-    termX = (((sunSize/2)+sunRayLength)*Math.cos(angle)) + sunLocation[0]
-    termY = (((sunSize/2)+sunRayLength)* Math.sin(angle)) + sunLocation[1]
+    var termX = (((sunSize/2)+sunRayLength)*Math.cos(angle)) + sunLocation[0]
+    var termY = (((sunSize/2)+sunRayLength)* Math.sin(angle)) + sunLocation[1]
 
     //console.log([edgeX,edgeY,termX,termY])
 
@@ -911,17 +1057,17 @@ function inputSeed(){
   }
 
   function degreesToRads(degrees){
-    ret = degrees*(Math.PI/180)
+    var ret = degrees*(Math.PI/180)
     return ret
   }
 
   function placePilesOnLeaf(xloc, yloc, radius, topHalfOnly){
-    perim = 2*Math.PI*radius
-    degreesPerStep = 360/perim
-    points = []
+    var perim = 2*Math.PI*radius
+    var degreesPerStep = 360/perim
+    var points = []
     for (b=0;b<perim;b++){
-      xpos = (radius*Math.cos(b*degreesPerStep)) + xloc
-      ypos = (radius* Math.sin(b*degreesPerStep)) + yloc
+      var xpos = (radius*Math.cos(b*degreesPerStep)) + xloc
+      var ypos = (radius* Math.sin(b*degreesPerStep)) + yloc
       //console.log("Point on radius found: " + xpos +"," +ypos)
       if((topHalfOnly&&ypos<yloc)||!topHalfOnly){
         //append(points,[xpos,ypos,0,3])
@@ -930,5 +1076,13 @@ function inputSeed(){
     }
     //console.log("Found " + counter + " points on circle")
     return points
+  }
+
+  function addToUserSeedInput(val){
+    
+    userSeed = userSeed.concat(val)
+    if(userSeed.length>5){
+      userSeed=""
+    }
   }
   
