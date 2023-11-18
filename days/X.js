@@ -35,6 +35,9 @@ let bWindowHeight = 0
 let bWindowWidth = 0
 let bWindowGap = 0
 
+const minTriangleRoofOdds = 0
+const maxTriangleRoofOdds = 0.8
+
 //Terrain
 let bgCol = null
 let hill1Col = null
@@ -145,7 +148,7 @@ class DayX extends Day {
         super();
         this.loop = true; // Set to true or false
 
-        this.controls = " Press Spacebar to generate a new town, control the wind with the Left and Right arrow key, and press Enter to shake the globe. You can also manually enter a town ID before pressing space to generate a specific globe. Don't forget to make a note of ones you like!"; // Write any controls for interactivity if needed or leave blank
+        this.controls = "Spacebar to generate a new town, or type in an ID to generate a specifc one. Left and Right arrow key to control the wind. Enter to shake the globe."; // Write any controls for interactivity if needed or leave blank
         this.credits = "Made by Ollie Withington"; // Replace with your name
 
         // Define variables here. Runs once during the sketch holder setup
@@ -163,7 +166,6 @@ class DayX extends Day {
     update() {
 
       //console.log("User seed:" + userSeed)
-      console.log("Total snow locations: " + snowLocations.length)
 
       // Update and draw stuff here. Runs continuously (or only once if this.loop = false), while your day is being viewed
       //if(allBuildingsDrawn!=true){
@@ -411,6 +413,10 @@ class DayX extends Day {
       else if(keyCode==13){
         shaking=true
       }
+      else if(keyCode==48){
+        console.log("0 pressed")
+        addToUserSeedInput("0")
+      }
       else if(keyCode==49){
         console.log("1 pressed")
         addToUserSeedInput("1")
@@ -544,8 +550,16 @@ function inputSeed(){
     var buildYloc = height-terrainHeight-bd[2]-1
     
     layerMainGraphics.rect(bd[0], buildYloc, bd[1], bd[2])
+
+    //Generate Pointed roof
+    if(bd[4]==true){
+
+      layerMainGraphics.fill(bd[3])
+      layerMainGraphics.stroke(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50)) 
+      layerMainGraphics.triangle(bd[0], buildYloc, bd[0]+bd[1], buildYloc, bd[0]+(bd[1]/2), buildYloc-(bd[1]/2));
+    }
     
-    //Generating DoorWay
+    //Generating DoorWay 
     layerMainGraphics.fill(color(bd[3][0]-50,bd[3][1]-50,bd[3][2]-50))
          
     layerMainGraphics.rect(bd[0]+(bd[1]/2)-(doorWidth/2), height-terrainHeight-doorHeight-1, doorWidth, doorHeight)
@@ -608,16 +622,16 @@ function inputSeed(){
     
     //h1Height = random(700, 1000)
     h1Cols = generateProximalColor(bgCols,30, 50, true) 
-    hill1Col = color(append(h1Cols,1000))
+    hill1Col = color(append(h1Cols,255))
     
     h2Height = random((h1Height-((height-h1Height)*(1/50)), (h1Height-((height-h1Height)*(1/40)))))
     //h2Height = random(h1Height-5, h1Height-10)  
     h2Cols = generateProximalColor(h1Cols,30, 50, true)
-    hill2Col = color(append(h2Cols,1000))
+    hill2Col = color(append(h2Cols,255))
     
     h3Height = random((h2Height-((height-h2Height)*(1/50)), ((height-h2Height)-(height*(1/40)))))
     h3Cols = generateProximalColor(h2Cols,30, 50, true)
-    hill3Col = color(append(h3Cols,1000))
+    hill3Col = color(append(h3Cols,255))
      
     buildingAnchorCol = generateProximalColor(h3Cols, 100, 60)
     
@@ -632,22 +646,24 @@ function inputSeed(){
   }
   
   function generateBuildingParameters(){
-    minBuildHeight = random((height*(1/20)), (height*(1/10)))
-    maxBuildHeight = random(minBuildHeight+(height*(1/20)), minBuildHeight+(height*(1/3)))
-    minBuildWidth = random((width*(1/50)), (width*(1/35)))
-    maxBuildWidth = random(minBuildWidth+(width*(1/50)), minBuildWidth+(width*(1/25)))
-    minBuildGap = random(-(width*(1/60)), (width*(1/40)))
-    maxBuildGap = random(max(minBuildGap+(width*(1/40)), 0), max(minBuildGap+(width*(1/25)), 10))
+    minBuildHeight = random(25, 70)
+    maxBuildHeight = random(minBuildHeight+35, minBuildHeight+220)
+    minBuildWidth = random(14, 50)
+    maxBuildWidth = random(minBuildWidth+14, minBuildWidth+28)
+    minBuildGap = random(-12, 12)
+    maxBuildGap = random(max((minBuildGap+12), 0), max(minBuildGap+28, 10))
     
-    widthPortionBuildings = random(0.15, 0.2)
+    widthPortionBuildings = random(0.15, 0.2) 
     
-    doorWidth = minBuildWidth/3
-    doorHeight = min((doorWidth*3),minBuildHeight/2)
+    doorWidth = random(minBuildWidth/6,minBuildWidth/3)
+    doorHeight = min((doorWidth*2.5 ),minBuildHeight/2)
     
-    bWindowHeight = doorWidth
+    bWindowHeight = doorWidth 
     bWindowWidth = doorWidth
     bWindowGap = doorWidth/2
-    
+
+    oddsOfTriangleRoof = random(minTriangleRoofOdds, maxTriangleRoofOdds)
+    console.log(oddsOfTriangleRoof)
   }
   
   function generateTreeParameters(){
@@ -692,7 +708,9 @@ function inputSeed(){
         generationLoc = i
         buildingWidth = random(minBuildWidth, maxBuildWidth)
         buildingHeight = random(minBuildHeight, maxBuildHeight)
-        bd=[i,buildingWidth,buildingHeight,generateProximalColor(buildingAnchorCol,0,30)]
+        triangleRoof = random(0,1)<oddsOfTriangleRoof
+        //console.log(triangleRoof  )
+        bd=[i,buildingWidth,buildingHeight,generateProximalColor(buildingAnchorCol,0,30),triangleRoof]
         append(buildingData,bd)
         
         
@@ -747,7 +765,6 @@ function inputSeed(){
         //End leaf
         append(leaves,[i, height-terrainHeight-(treeHeight*.95),treeHeight*.4])
         placePilesOnLeaf(i,height-terrainHeight-(treeHeight*.95),  (treeHeight*.4)/2, true)
-        //snowPilePositions = concat(snowPilePositions, endPoints)
 
         //Sub branches
         var branchMinRoot = treeBaseYLoc-(treeHeight*.2)
@@ -815,17 +832,53 @@ function inputSeed(){
     var bHeight = bd[2]
     
     var by1=(bHeight+terrainHeight)
+
     var bx2=bx1+bWidth
     var by2=terrainHeight
+
+    /*
+    var prevBuildingMaxY = prevDrawnBuilding[1]
+    //Handling for not drawing snow in front of triangle roofs
+    console.log(prevDrawnBuilding[3])
+    if(prevDrawnBuilding[4]==true){
+      console.log("Pre alter: " + prevBuildingMaxY)
+      prevBuildingMaxY-=(prevDrawnBuilding[2]/2)
+      console.log("Post alter: " + prevBuildingMaxY)
+    }
+    */
     
-    //Roof snow piles
-    
-    for(k=bx1;k<(bx1+bWidth);k++){ 
-      
-      if(!(k>prevDrawnBuilding[0]&&k<prevDrawnBuilding[2]&&by1<prevDrawnBuilding[1]&&by1>prevDrawnBuilding[3])){
-        
-        append(snowPilePositions,[k,by1,0,5])
+    //Triangle Roof Piles
+    if(bd[4]==true){ 
+      //Left half of roof
+      for(var l=0;l<(bWidth/2);l++){ 
+        var xPos =bx1+l
+        var yPos = by1+l
+        if(!(xPos>prevDrawnBuilding[0]&&xPos<+prevDrawnBuilding[2]&&yPos<prevDrawnBuilding[1]&&yPos>prevDrawnBuilding[3])){
+          
+          append(snowPilePositions,[xPos,yPos,0,int(bWindowHeight/2)])
+        }
       }
+      for(var r=(bWidth/2);r<bWidth;r++){  
+        var xPos =bx1+r
+        var yPos = by1+bWidth-r
+        if(!(xPos>prevDrawnBuilding[0]&&xPos<prevDrawnBuilding[2]&&yPos<prevDrawnBuilding[1]&&yPos>prevDrawnBuilding[3])){
+          
+          append(snowPilePositions,[xPos,yPos,0,int(bWindowHeight/2)])
+        }
+      }
+    }
+    else{
+       
+      //Roof snow piles
+      
+      for(var k=bx1;k<(bx1+bWidth);k++){ 
+        
+        if(!(k>prevDrawnBuilding[0]&&k<prevDrawnBuilding[2]&&by1<prevDrawnBuilding[1]&&by1>prevDrawnBuilding[3])){
+          
+          append(snowPilePositions,[k,by1,0,int(bWindowHeight/2)])
+        }
+      }
+
     }
   
     var wData = calcWindowData(bd[1],bd[2])
@@ -834,20 +887,28 @@ function inputSeed(){
     var horiSideGap = wData[2]
   
   
-    for (x=0;x<horiWindowCount;x++){
-      for (y=0;y<vertWindowCount;y++){
+    for (x=0;x<horiWindowCount;x++){  
+      for (y=0;y<vertWindowCount;y++){   
         for(w=0;w<bWindowWidth;w++){
           
           var xLoc=bx1+horiSideGap+(x*(bWindowWidth+bWindowGap))+w
           var yLoc = by1-bWindowGap-(y*(bWindowWidth+bWindowGap))-bWindowWidth
-          if(!(xLoc>prevDrawnBuilding[0]&&xLoc<prevDrawnBuilding[2]&&yLoc<prevDrawnBuilding[1]&&yLoc>prevDrawnBuilding[3])){
-            append(snowPilePositions,[xLoc,yLoc,0, 4])
+          if(!(xLoc>prevDrawnBuilding[0]&&xLoc<+prevDrawnBuilding[2]&&yLoc<prevDrawnBuilding[1]&&yLoc>prevDrawnBuilding[3])){
+            append(snowPilePositions,[xLoc,yLoc,0, int(bWindowHeight/2)])
           }
           
         }
       }
   
     }
+
+    //Increase the stored height if drawing a triangle roof
+
+    
+    if(bd[4]==true){
+      by1+=(bWidth/2)
+    }
+    
     
     prevDrawnBuilding = [bx1,by1,bx2,by2]
   }
