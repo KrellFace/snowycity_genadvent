@@ -135,8 +135,6 @@ function dayXPreload() {
     // Load any assets here (with assets.dayX at the front of the variable name)
 }
 
-
-
 class DayX extends Day {
 
     constructor () {
@@ -165,66 +163,37 @@ class DayX extends Day {
 
     update() {
 
-      // Update and draw stuff here. Runs continuously (or only once if this.loop = false), while your day is being viewed
-
       layerDynamicScene.clear()
-      
-      //layerStaticScene.background(bgCol);
-      //drawSun(sunColor,sunSize,sunLocation)
+
       drawSunRays()
 
-      //Terrain Gen
-      //generateAllHills()
-      //drawTerrainBase(terrainHeight, terrainCol, darkerTerrain, darkestTerrain)
-  
-      //drawAllBuildings()
-      //console.log(treeData.length)
-      
-      //treeData.forEach(drawTree)
-      //layerStaticScene.strokeWeight(1)
-  
-      //Generating new snow
       initialiseSnowLocations()
 
       //Update snow wind
       if(blowingRight&&currWind<maxWind){
         currWind+=1
-      }
-      else if(blowingLeft&&currWind>-maxWind){
+      }else if(blowingLeft&&currWind>-maxWind){
         currWind-=1
-      }
-      else if(currWind<0){
+      }else if(currWind<0){
         currWind+=1
-      }
-      else if(currWind>0){
+      }else if(currWind>0){
         currWind-=1
       }
 
       //Falling snow
       fallingSnowLogic()
       
-      
       if(accumulatingSnow){
         updateSnowPiles()
-
       }
  
-      //Draw trees last so they are in front of snowy windows
-      //treeData.forEach(drawTree)
-      //layerStaticScene.strokeWeight(1)  
-      
-      //drawGlobeAndStaticUI()
-
-      //image(layerStaticScene,700, 700)
       if(shaking){
         shake()
-
       }
       
       drawDynamicUI()
 
       //Assemble final image
-     
       image(layerStaticScene,shakeCurrOffset,0)
       image(layerDynamicScene,shakeCurrOffset,0)
       image(layerTreesOnly,shakeCurrOffset,0) 
@@ -259,45 +228,25 @@ class DayX extends Day {
       //Numeric
       else if(keyCode==13){
         shaking=true
-      }
-      else if(keyCode==48){
-        console.log("0 pressed")
+      }else if(keyCode==48){
         addToUserSeedInput("0")
-      }
-      else if(keyCode==49){
-        console.log("1 pressed")
+      }else if(keyCode==49){
         addToUserSeedInput("1")
-      }
-      else if(keyCode==50){
-        console.log("2 pressed")
+      }else if(keyCode==50){
         addToUserSeedInput("2")
-      }
-      else if(keyCode==51){
-        console.log("3 pressed")
+      }else if(keyCode==51){
         addToUserSeedInput("3")
-      }
-      else if(keyCode==52){
-        console.log("4 pressed")
+      }else if(keyCode==52){
         addToUserSeedInput("4")
-      }
-      else if(keyCode==53){
-        console.log("5 pressed")
+      }else if(keyCode==53){
         addToUserSeedInput("5")
-      }
-      else if(keyCode==54){
-        console.log("6 pressed")
+      }else if(keyCode==54){
         addToUserSeedInput("6")
-      }
-      else if(keyCode==55){
-        console.log("7 pressed")
+      }else if(keyCode==55){12
         addToUserSeedInput("7")
-      }
-      else if(keyCode==56){
-        console.log("8 pressed")
+      }else if(keyCode==56){
         addToUserSeedInput("8")
-      }
-      else if(keyCode==57){1
-        console.log("9 pressed")
+      }else if(keyCode==57){
         addToUserSeedInput("9")
       }
 
@@ -331,10 +280,11 @@ function initialise(){
     snowLocations=[]
     snowPilePositions=[]
     accumulatingSnow=false  
+    layerTreesOnly.clear()
 
+    //Generate a new town either based on a user input seed or randomly
     if(userSeed!=null&&!isNaN(int(userSeed))){
         mainSeed = int(userSeed)
-        
     }
     else{
         mainSeed = int(random(0,10000))
@@ -346,51 +296,51 @@ function initialise(){
     noiseSeed(mainSeed)
     randomSeed(mainSeed)
   
-    generateColors()            
+    //Generate main pallets
+    generateColors()
 
-    layerStaticScene.background(bgCol);
-
-    generateSunCharacteristics(bgCol)
-
+    //Generate characteristics of main features
     h1Seed = random(0,1000)
     h2Seed = h1Seed+500
     h3Seed = h2Seed+1000
-
-    generateAllHills()
-
-    //Terrain Gen
     terrainHeight = random(130, 130)
-    drawTerrainBase(terrainHeight, terrainCol, darkerTerrain, darkestTerrain)
+    generateSunCharacteristics(bgCol)  
 
+    generateBuildingParameters() 
+    generateBuildingData()   
+    generateTreeParameters() 
+    generateTreeData()     
+
+    //Draw Static objects and terrain, and place snow pile positions
+    layerStaticScene.background(bgCol);
+    drawSun(sunColor,sunSize,sunLocation)
+    generateAllHills()
+    drawTerrainBase(terrainHeight, terrainCol, darkerTerrain, darkestTerrain)
+  
     for(z=0;z<width;z++){
         append(snowPilePositions,[z,terrainHeight,0,100])
     }
 
-    //Generating Building Design parameters and locations
-    generateBuildingParameters()
-    generateBuildingData()
-    //Generating Tree Design parameters and locations
-    generateTreeParameters()
-    generateTreeData() 
-
-    drawSun(sunColor,sunSize,sunLocation)
-
+    //Reverse order of buildings to prevent snow piles being drawn on top of buildings that appear to be in front
     buildingData.reverse().forEach(generateSnowPileDataForBuilding)
     buildingData.reverse()
+
     drawAllBuildings()
     treeData.forEach(drawTree)
 
+    //Draw unchanging UI elements
     drawGlobeAndStaticUI()
-    }
+  }
 
+  //Dedicated layer for a highlight to (hopefully) give the snow globe a 3D effect
   function initialiseGlobeHighlightImg(){
     layerGlobeHighlight.fill([255,255,255,35])
     layerGlobeHighlight.noStroke()
-    layerGlobeHighlight.circle((width/2)+20,(height/2)-20,550)
+    layerGlobeHighlight.circle((width/2),(height/2)-20,550)
 
     layerGlobeHighlight.erase()
-    layerGlobeHighlight.noStroke()
-    layerGlobeHighlight.circle((width/2)+20,(height/2)-20,500)
+    layerGlobeHighlight.noStroke() 
+    layerGlobeHighlight.circle((width/2),(height/2)-20,520) 
     layerGlobeHighlight.noErase()
 
     layerGlobeHighlight.erase()
@@ -617,14 +567,7 @@ function initialise(){
         var branchYOffsetRatio = random(minYOffSetRatio, maxYOffSetRatio)
         //Main stem
         append(branches,[i, treeBaseYLoc,i, treeTopYLoc,5])
-        /*
-        //Big Leaf
-        append(leaves,[i, height-terrainHeight-(treeHeight*.7),treeHeight*.55])
-        //Med Leaf
-        append(leaves,[i, height-terrainHeight-(treeHeight*.85),treeHeight*.35])
-        //Small Leaf
-        append(leaves,[i, height-terrainHeight-(treeHeight*.95),treeHeight*.2])
-        */
+
         //End leaf
         append(leaves,[i, height-terrainHeight-(treeHeight*.95),treeHeight*.4])
         placePilesOnLeaf(i,height-terrainHeight-(treeHeight*.95),  (treeHeight*.4)/2, true)
@@ -645,14 +588,6 @@ function initialise(){
           
           
           append(branches,[i, root,i+branchXLength, root+branchY ,3])
-          /*
-          //Big Leaf
-          append(leaves,[i+(branchXLength*.4), root+(branchY*.4),branchXLength*.8])
-          //Med Leaf
-          append(leaves,[i+(branchXLength*.65), root+(branchY*.65),branchXLength*.5])
-          //Small Leaf
-          append(leaves,[i+(branchXLength*.95), root+(branchY*.95),branchXLength*.3])
-          */
           //End leaf
           append(leaves,[i+(branchXLength*.95), root+(branchY*.95),branchXLength*.6])
           var cachedLength = branchXLength
@@ -669,7 +604,6 @@ function initialise(){
       }
     }
     
-    //console.log("All building data generated")
   }
   
   function drawTree(td){ 
@@ -683,7 +617,8 @@ function initialise(){
     //Draw Leaves
     for(j = 0; j<td[1].length;j++){
       layerTreesOnly.noStroke()
-      layerTreesOnly.fill(treeLeafColor)
+      //layerTreesOnly.fill(treeLeafColor)
+      layerTreesOnly.fill(generateProximalColor(treeLeafColor,0, 20))
       layerTreesOnly.circle(td[1][j][0],td[1][j][1],td[1][j][2])
     }  
   }

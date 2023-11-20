@@ -5,7 +5,7 @@ body {
     background-color: #111;
 }
 
-canvas {
+#canvas-wrapper {
     margin: auto;
     position: absolute;
     left: 50%;
@@ -14,16 +14,20 @@ canvas {
     z-index: -1;
 }
 
+canvas {
+    margin-bottom: 60px;
+}
+
 #info {
     color: #fff;
     font-size: 16px;
     font-family: monospace;
-    width: 700px;
+    width: 100%;
     text-align: center;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, 350px);
+    transform: translate(-50%, 320px);
     z-index: 1;
 }
 
