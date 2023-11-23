@@ -326,10 +326,10 @@ class DayX extends Day {
 
     keyReleased() {
       if(keyCode == RIGHT_ARROW){
-        blowingRight = false
+        this.blowingRight = false
       }
       else if(keyCode == LEFT_ARROW){
-        blowingLeft = false
+        this.blowingLeft = false
       }
     }
 
