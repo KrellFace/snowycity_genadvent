@@ -1,4 +1,4 @@
-// Made by Ollie Withington 
+// Made by Oliver Withington 
 
 function dayXPreload() {
 
@@ -13,7 +13,7 @@ class DayX extends Day {
         this.loop = true; // Set to true or false
 
         this.controls = "Spacebar: New Globe. Left+Right Arrows: Control the Wind. Enter: Shake!"; // Write any controls for interactivity if needed or leave blank
-        this.credits = "Made by Ollie Withington"; // Replace with your name
+        this.credits = "Made by Oliver Withington"; // Replace with your name
         
         // Define variables here. Runs once during the sketch holder setup
 
